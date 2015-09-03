@@ -43,10 +43,14 @@ import org.fenixedu.academic.domain.person.Gender;
 import org.fenixedu.academic.domain.person.IDDocumentType;
 import org.fenixedu.academic.domain.student.PersonalIngressionData;
 import org.fenixedu.academic.domain.student.Registration;
-import org.fenixedu.bennu.core.domain.Bennu;
+import org.fenixedu.spaces.domain.Space;
 import org.joda.time.YearMonthDay;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.microsoft.schemas._2003._10.serialization.arrays.ArrayOfstring;
+import com.qubit.solution.fenixedu.bennu.webservices.services.client.BennuWebServiceClient;
+import com.qubit.solution.fenixedu.integration.cgd.domain.configuration.CgdIntegrationConfiguration;
 
 import services.caixaiu.cgd.wingman.iesservice.Client;
 import services.caixaiu.cgd.wingman.iesservice.Form43Digital;
@@ -59,10 +63,6 @@ import services.caixaiu.cgd.wingman.iesservice.Person;
 import services.caixaiu.cgd.wingman.iesservice.Student;
 import services.caixaiu.cgd.wingman.iesservice.ValidationResult;
 import services.caixaiu.cgd.wingman.iesservice.Worker;
-
-import com.microsoft.schemas._2003._10.serialization.arrays.ArrayOfstring;
-import com.qubit.solution.fenixedu.bennu.webservices.services.client.BennuWebServiceClient;
-import com.qubit.solution.fenixedu.integration.cgd.domain.configuration.CgdIntegrationConfiguration;
 
 public class CgdForm43Sender extends BennuWebServiceClient<IIESService> {
 
@@ -87,7 +87,7 @@ public class CgdForm43Sender extends BennuWebServiceClient<IIESService> {
         boolean success = false;
         try {
             org.fenixedu.academic.domain.Person person = registration.getStudent().getPerson();
-            Client clientData = createClient(person, service);
+            Client clientData = createClient(person, service, registration);
             Person personData = createPerson(person);
             Worker workerData = createWorker(person);
             Student studentData = createStudent(registration);
@@ -120,15 +120,14 @@ public class CgdForm43Sender extends BennuWebServiceClient<IIESService> {
         return success;
     }
 
-    private static String getInstitutionCode() {
-        String code = Bennu.getInstance().getInstitutionUnit().getCode();
-
-        return code;
+    private static String getInstitutionCode(final Registration registration) {
+        final Space campus = registration.getCampus();
+        return campus.getName().equals("Taguspark") ? "808" : "807";
     }
 
-    private static Client createClient(org.fenixedu.academic.domain.Person person, IIESService service) {
+    private static Client createClient(org.fenixedu.academic.domain.Person person, IIESService service, final Registration registration) {
         Client client = new Client();
-        String findIES = findIES(getInstitutionCode(), service);
+        String findIES = findIES(getInstitutionCode(registration), service);
         client.setIES(findIES);
         client.setGroup(objectFactory.createClientGroup("1")); // Fernando Nunes indicou que é o protocolo e neste caso será sempre 1
         client.setMemberCategoryCode("91"); // Resposta da Carla Récio a 19 do 6 indica que grande parte das escolas usam ALUNOS 
@@ -330,9 +329,10 @@ public class CgdForm43Sender extends BennuWebServiceClient<IIESService> {
 
     private static Student createStudent(Registration registration) {
         Student student = new Student();
-        student.setSchoolCode(getInstitutionCode());
+        student.setSchoolCode(getInstitutionCode(registration));
         student.setCourse(registration.getDegreeName());
-        student.setStudentNumber(registration.getStudent().getNumber());
+        String retrieveMemberID = CgdIntegrationConfiguration.getInstance().getMemberIDStrategy().retrieveMemberID(registration.getPerson());
+        student.setStudentNumber(Long.valueOf(retrieveMemberID));
         student.setAcademicYear(registration.getCurricularYear());
         student.setAcademicDegreeCode(objectFactory.createStudentAcademicDegreeCode(getCodeForDegreeType(
                 registration.getDegree().getDegreeType()).toString()));
@@ -351,47 +351,35 @@ public class CgdForm43Sender extends BennuWebServiceClient<IIESService> {
         Integer NO_STUDIES = 7;
         Integer OTHER = 99;
 
-        String code = degreeType.getCode();
-
-        // Deveria ser feito alinhamento programatico
-        if ("BACHELOR".equals(code)) {
-            return BACHELHOR;
-        } else if ("DEGREE".equals(code)) {
+        if (degreeType.isDegree() || degreeType.isBolonhaDegree()) {
             return DEGREE;
-        } else if ("MASTER_DEGREE".equals(code)) {
+        }
+        if (degreeType.isMasterDegree() || degreeType.isBolonhaMasterDegree()) {
             return MASTERS;
-        } else if ("PHD".equals(code)) {
+        }
+        if (degreeType.isIntegratedMasterDegree()) {
+            return MASTERS;
+        }
+        if (degreeType.isAdvancedSpecializationDiploma()) {
             return PHD;
-        } else if ("SPECIALIZATION_DEGREE".equals(code)) {
+        }
+        if (degreeType.isAdvancedFormationDiploma()) {
             return OTHER;
-        } else if ("BOLONHA_DEGREE".equals(code)) {
-            return DEGREE;
-        } else if ("BOLONHA_MASTER_DEGREE".equals(code)) {
-            return MASTERS;
-        } else if ("BOLONHA_INTEGRATED_MASTER_DEGREE".equals(code)) {
-            return MASTERS;
-        } else if ("BOLONHA_PHD".equals(code)) {
-            return PHD;
-        } else if ("BOLONHA_ADVANCED_FORMATION_DIPLOMA".equals(code)) {
+        }
+        if (degreeType.isSpecializationDegree()) {
             return OTHER;
-        } else if ("BOLONHA_ADVANCED_SPECIALIZATION_DIPLOMA".equals(code)) {
-            return OTHER;
-        } else if ("BOLONHA_SPECIALIZATION_DEGREE".equals(code)) {
-            return OTHER;
-        } else if ("FREE_DEGREE".equals(code)) {
-            return OTHER;
-        } else if ("BOLONHA_POST_DOCTORAL_DEGREE".equals(code)) {
-            return OTHER;
-        } else if ("EMPTY".equals(code)) {
+        }
+        if (degreeType.isEmpty()) {
             return NO_STUDIES;
         }
-
-        return DEGREE;
+        throw new Error("Unknown degree type: " + degreeType);
+        //return DEGREE;
     }
 
     private static String findIES(String ministryCode, IIESService service) {
         List<School> schools = service.getSchools().getSchool();
         for (School school : schools) {
+            System.out.println("School: " + school.getCode().getValue() + " - " + school.getDescription().getValue() + " - " + school.getPartnerCode().getValue());
             if (ministryCode.equals(school.getCode().getValue())) {
                 return school.getPartnerCode().getValue();
             }

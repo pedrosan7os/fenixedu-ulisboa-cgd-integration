@@ -27,11 +27,10 @@
 package com.qubit.solution.fenixedu.integration.cgd.services.integration;
 
 import org.fenixedu.academic.domain.student.Registration;
-import org.fenixedu.ulisboa.specifications.domain.student.access.importation.external.SyncRegistrationWithExternalServices;
 
 import com.qubit.solution.fenixedu.integration.cgd.services.form43.CgdForm43Sender;
 
-public class SyncRegistrationWithCgd implements SyncRegistrationWithExternalServices {
+public class SyncRegistrationWithCgd /* implements SyncRegistrationWithExternalServices */ {
 
     private CgdForm43Sender sender = null;
 
@@ -42,7 +41,7 @@ public class SyncRegistrationWithCgd implements SyncRegistrationWithExternalServ
         return sender;
     }
 
-    @Override
+    //@Override
     public boolean syncRegistrationToExternal(Registration registration) {
         return getSender().sendForm43For(registration);
     }
