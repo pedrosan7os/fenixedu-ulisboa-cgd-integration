@@ -42,4 +42,9 @@ public class UsernameAdapter implements IMemberIDAdapter {
         return Person.findByUsername(memberID);
     }
 
+    @Override
+    public boolean isAllowedAccessToMember(Person person) {
+        return true;
+    }
+
 }

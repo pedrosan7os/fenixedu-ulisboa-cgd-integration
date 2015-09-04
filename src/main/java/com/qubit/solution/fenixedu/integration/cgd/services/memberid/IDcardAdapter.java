@@ -56,4 +56,9 @@ public class IDcardAdapter implements IMemberIDAdapter {
         return person;
     }
 
+    @Override
+    public boolean isAllowedAccessToMember(Person person) {
+        return true;
+    }
+
 }
