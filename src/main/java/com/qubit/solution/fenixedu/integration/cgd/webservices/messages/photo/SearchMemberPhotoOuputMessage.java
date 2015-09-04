@@ -32,7 +32,9 @@ import org.fenixedu.academic.domain.Person;
 import org.fenixedu.academic.domain.Photograph;
 import org.fenixedu.academic.domain.photograph.PictureMode;
 
+import com.qubit.solution.fenixedu.integration.cgd.domain.configuration.CgdIntegrationConfiguration;
 import com.qubit.solution.fenixedu.integration.cgd.webservices.messages.CgdMessageUtils;
+import com.qubit.solution.fenixedu.integration.cgd.webservices.resolver.memberid.IMemberIDAdapter;
 
 public class SearchMemberPhotoOuputMessage implements Serializable {
 
@@ -72,8 +74,9 @@ public class SearchMemberPhotoOuputMessage implements Serializable {
     }
 
     public void populate(Person person, String populationCode, String memberCode, String memberID) {
+        final IMemberIDAdapter strategy = CgdIntegrationConfiguration.getInstance().getMemberIDStrategy();
         boolean verifyMatch = CgdMessageUtils.verifyMatch(person, populationCode, memberCode, memberID);
-        if (verifyMatch) {
+        if (verifyMatch && person != null && strategy.isAllowedAccessToMember(person)) {
             Photograph personalPhoto = person.getPersonalPhoto();
             if (personalPhoto == null) {
                 setReplyCode(UNAVAILABLE_PHOTO);

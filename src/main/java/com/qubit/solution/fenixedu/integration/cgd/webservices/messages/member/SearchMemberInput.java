@@ -36,6 +36,7 @@ import org.fenixedu.academic.domain.person.IDDocumentType;
 
 import com.qubit.solution.fenixedu.integration.cgd.domain.configuration.CgdIntegrationConfiguration;
 import com.qubit.solution.fenixedu.integration.cgd.webservices.messages.CgdMessageUtils;
+import com.qubit.solution.fenixedu.integration.cgd.webservices.resolver.memberid.IMemberIDAdapter;
 
 public class SearchMemberInput implements Serializable {
 
@@ -148,6 +149,7 @@ public class SearchMemberInput implements Serializable {
         if (requestedPerson == null && !StringUtils.isEmpty(getMemberCode())) {
             requestedPerson = CgdMessageUtils.readPersonByMemberCode(getPopulationCode(), getMemberCode());
         }
-        return requestedPerson;
+        final IMemberIDAdapter strategy = CgdIntegrationConfiguration.getInstance().getMemberIDStrategy();
+        return strategy.isAllowedAccessToMember(requestedPerson) ? requestedPerson : null;
     }
 }

@@ -33,4 +33,7 @@ public interface IMemberIDAdapter {
     public String retrieveMemberID(Person person);
 
     public Person readPerson(String memberID);
+
+    public boolean isAllowedAccessToMember(final Person person);
+
 }

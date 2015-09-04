@@ -379,7 +379,6 @@ public class CgdForm43Sender extends BennuWebServiceClient<IIESService> {
     private static String findIES(String ministryCode, IIESService service) {
         List<School> schools = service.getSchools().getSchool();
         for (School school : schools) {
-            System.out.println("School: " + school.getCode().getValue() + " - " + school.getDescription().getValue() + " - " + school.getPartnerCode().getValue());
             if (ministryCode.equals(school.getCode().getValue())) {
                 return school.getPartnerCode().getValue();
             }

@@ -31,6 +31,7 @@ import java.io.Serializable;
 import org.fenixedu.academic.domain.Person;
 
 import com.qubit.solution.fenixedu.integration.cgd.webservices.messages.CgdMessageUtils;
+import com.qubit.solution.fenixedu.integration.cgd.webservices.resolver.memberid.IMemberIDAdapter;
 
 public class SearchMemberPhotoInputMessage implements Serializable {
 
@@ -75,11 +76,12 @@ public class SearchMemberPhotoInputMessage implements Serializable {
     }
 
     public Person getIdentifiedPerson() {
-        Person person = CgdMessageUtils.getMemberIDStrategy().readPerson(getMemberID());
+        final IMemberIDAdapter strategy = CgdMessageUtils.getMemberIDStrategy();
+        Person person = strategy.readPerson(getMemberID());
         if (person == null) {
             person = CgdMessageUtils.readPersonByMemberCode(getPopulationCode(), getMemberCode());
         }
-        return person;
+        return person != null && strategy.isAllowedAccessToMember(person) ? person : null;
     }
 
 }

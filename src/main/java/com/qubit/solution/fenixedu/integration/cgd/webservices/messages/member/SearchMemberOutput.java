@@ -53,9 +53,9 @@ public class SearchMemberOutput implements Serializable {
 
         //        boolean verifyMatch = CgdMessageUtils.verifyMatch(person, populationCode, memberCode, memberID);
         //         if (verifyMatch) {
-        if (person != null) {
+        IMemberIDAdapter memberIDStrategy = CgdMessageUtils.getMemberIDStrategy();
+        if (person != null && memberIDStrategy.isAllowedAccessToMember(person)) {
             setReplyCode(CgdMessageUtils.REPLY_CODE_OPERATION_OK);
-            IMemberIDAdapter memberIDStrategy = CgdMessageUtils.getMemberIDStrategy();
             List<SearchMemberOutputData> list = new ArrayList<SearchMemberOutputData>();
             ExecutionYear readCurrentExecutionYear = ExecutionYear.readCurrentExecutionYear();
             ExecutionYear previousYear = readCurrentExecutionYear.getPreviousExecutionYear();
