@@ -17,7 +17,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import com.qubit.solution.fenixedu.integration.cgd.ui.CgdBaseController;
 import com.qubit.solution.fenixedu.integration.cgd.ui.CgdController;
 
-@SpringFunctionality(app = CgdController.class, title = "label.title.mifareManagement", accessGroup = "#managers | #cgdCollaborators")
+@SpringFunctionality(app = CgdController.class, title = "label.title.mifareManagement",
+        accessGroup = "#managers | #cgdCollaborators")
 @RequestMapping("/cgd/mifaremanagement/person")
 public class PersonController extends CgdBaseController {
 
