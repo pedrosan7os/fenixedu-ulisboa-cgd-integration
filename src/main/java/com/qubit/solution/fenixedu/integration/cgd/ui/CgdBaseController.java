@@ -28,9 +28,11 @@ package com.qubit.solution.fenixedu.integration.cgd.ui;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.POST;
+
 import java.util.List;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
+
 import org.fenixedu.bennu.spring.portal.SpringApplication;
 import org.fenixedu.bennu.spring.portal.SpringFunctionality;
 import org.springframework.ui.Model;
@@ -43,13 +45,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
 import org.fenixedu.bennu.core.domain.exceptions.DomainException;
 import org.fenixedu.bennu.core.domain.Bennu;
+
 import pt.ist.fenixframework.Atomic;
 
 public class CgdBaseController {
     private static final String ERROR_MESSAGES = "errorMessages";
     private static final String WARNING_MESSAGES = "warningMessages";
     private static final String INFO_MESSAGES = "infoMessages";
-
+    public final static String BUNDLE = "resources/CgdintegrationResources";
     //The HTTP Request that can be used internally in the controller
     protected @Autowired HttpServletRequest request;
 
@@ -99,4 +102,5 @@ public class CgdBaseController {
         //....
     }
 
+>>>>>>> 420fc5c... Now allowing duplicated mifares, allowing card deletions and support to search
 }
