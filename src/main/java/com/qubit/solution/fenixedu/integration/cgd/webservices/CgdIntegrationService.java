@@ -33,6 +33,8 @@ import org.fenixedu.academic.domain.Person;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 
+import com.qubit.solution.fenixedu.bennu.webservices.domain.webservice.WebServiceConfiguration;
+import com.qubit.solution.fenixedu.bennu.webservices.domain.webservice.WebServiceServerConfiguration;
 import com.qubit.solution.fenixedu.bennu.webservices.services.server.BennuWebService;
 import com.qubit.solution.fenixedu.integration.cgd.webservices.messages.member.SearchMemberInput;
 import com.qubit.solution.fenixedu.integration.cgd.webservices.messages.member.SearchMemberOutput;
@@ -59,7 +61,7 @@ public class CgdIntegrationService extends BennuWebService {
         SearchMemberPhotoOuputMessage outputMessage = new SearchMemberPhotoOuputMessage();
         Person person = message.getIdentifiedPerson();
         if (person != null) {
-            outputMessage.populate(person, message.getPopulationCode(), message.getMemberCode(),message.getMemberID());
+            outputMessage.populate(person, message.getPopulationCode(), message.getMemberCode(), message.getMemberID());
         }
         return outputMessage;
     }
@@ -74,6 +76,17 @@ public class CgdIntegrationService extends BennuWebService {
                     LocalDate.parse(message.getPersonalizationDate(), DateTimeFormat.forPattern("YYYY-MM-dd")));
         }
         return outputMessage;
+    }
+
+    public static boolean validate(final String username, final String password) {
+        final WebServiceConfiguration config =
+                WebServiceServerConfiguration.readByImplementationClass(CgdIntegrationService.class.getName());
+        if (config instanceof WebServiceServerConfiguration) {
+            final WebServiceServerConfiguration serverConfig = (WebServiceServerConfiguration) config;
+            return username != null && password != null && username.equals(serverConfig.getServiceUsername())
+                    && password.equals(serverConfig.getServicePassword());
+        }
+        return false;
     }
 
 }
