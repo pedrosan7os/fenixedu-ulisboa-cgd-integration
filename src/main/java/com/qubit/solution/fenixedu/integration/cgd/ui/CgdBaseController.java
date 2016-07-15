@@ -102,5 +102,4 @@ public class CgdBaseController {
         //....
     }
 
->>>>>>> 420fc5c... Now allowing duplicated mifares, allowing card deletions and support to search
 }

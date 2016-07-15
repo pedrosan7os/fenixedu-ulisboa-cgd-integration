@@ -43,7 +43,7 @@ public class CgdCard extends CgdCard_Base {
     }
 
     @Atomic
-    protected void delete() {
+    public void delete() {
         setPerson(null);
         setRootDomainObject(null);
         super.deleteDomainObject();
