@@ -63,27 +63,23 @@ public class CgdMessageUtils {
     }
 
     public static boolean verifyMatch(Person person, String populationCode, String memberCode, String memberID) {
-        boolean matchOk = StringUtils.isEmpty(populationCode) || StringUtils.isEmpty(memberCode);
-
-        if (!matchOk) {
-            switch (populationCode.charAt(0)) {
-            case 'A':
-                matchOk = person.getStudent() != null && String.valueOf(person.getStudent().getNumber()).equals(memberCode);
-                break;
-            case 'F':
-                matchOk = DynamicGroup.get("employees").isMember(person.getUser());
-                break;
-            case 'D':
-                matchOk = person.getTeacher() != null && person.getTeacher().getTeacherId().equals(memberCode);
-                break;
+        final String mid = getMemberIDStrategy().retrieveMemberID(person);
+        if (!StringUtils.isEmpty(populationCode) && !StringUtils.isEmpty(memberCode)) {
+            final char pc = populationCode.charAt(0);
+            if (pc == 'A' && person.getStudent() == null) {
+                return false;
+            }
+            if (pc == 'F' && !DynamicGroup.get("employees").isMember(person.getUser())) {
+                return false;
+            }
+            if (pc == 'D' && person.getTeacher() == null) {
+                return false;
+            }
+            if (!memberCode.equals(mid)) {
+                return false;
             }
         }
-
-        if (matchOk && !StringUtils.isEmpty(memberID)) {
-            matchOk = memberID.equals(getMemberIDStrategy().retrieveMemberID(person));
-        }
-
-        return matchOk;
+        return !StringUtils.isEmpty(memberID) && memberID.equals(mid);
     }
 
     public static IMemberIDAdapter getMemberIDStrategy() {

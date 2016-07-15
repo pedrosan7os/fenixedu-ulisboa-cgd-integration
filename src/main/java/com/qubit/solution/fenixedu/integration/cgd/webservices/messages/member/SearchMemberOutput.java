@@ -90,12 +90,13 @@ public class SearchMemberOutput implements Serializable {
 
                 SearchMemberOutputData createDefault = SearchMemberOutputData.createDefault(memberIDStrategy, person);
                 if (!StringUtils.isEmpty(populationCode)) {
+                    final String memberId = memberIDStrategy.retrieveMemberID(person);
                     switch (populationCode.charAt(0)) {
                     case 'A':
                         Student student = person.getStudent();
                         if (student != null) {
                             createDefault.setPopulationCode("A");
-                            createDefault.setStudentNumber(String.valueOf(student.getNumber()));
+                            createDefault.setStudentNumber(memberId);
                         }
                         break;
                     case 'D':
@@ -107,14 +108,14 @@ public class SearchMemberOutput implements Serializable {
                                 content = content.substring(0, 23);
                             }
                             createDefault.setTeacherCategory(content);
-                            createDefault.setTeacherNumber(teacher.getTeacherId());
+                            createDefault.setTeacherNumber(memberId);
                         }
                         break;
                     case 'F':
                         boolean member = DynamicGroup.get("employees").isMember(person.getUser());
                         if (member) {
                             createDefault.setPopulationCode("F");
-                            createDefault.setTeacherNumber(person.getUsername());
+                            createDefault.setTeacherNumber(memberId);
                         }
                     }
                 }

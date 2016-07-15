@@ -233,9 +233,8 @@ public class SearchMemberOutputData implements Serializable {
 
         SearchMemberOutputData searchMemberOutputData = createDefault(strategy, person);
         searchMemberOutputData.setPopulationCode("A");
-        searchMemberOutputData.setStudentNumber(String.valueOf(student.getNumber()));
-
-        searchMemberOutputData.setStudentNumber(String.valueOf(student.getNumber()));
+        final String memberId = strategy.retrieveMemberID(person);
+        searchMemberOutputData.setStudentNumber(String.valueOf(memberId));
         searchMemberOutputData.setDegreeCode(registration.getDegree().getMinistryCode());
         searchMemberOutputData.setDegreeName(registration.getDegree().getIdCardName());
         searchMemberOutputData.setCurricularYear(registration.getCurricularYear());
@@ -262,7 +261,8 @@ public class SearchMemberOutputData implements Serializable {
             }
             searchMemberOutputData.setTeacherCategory(content);
         }
-        searchMemberOutputData.setTeacherNumber(teacher.getTeacherId());
+        final String memberId = strategy.retrieveMemberID(person);
+        searchMemberOutputData.setTeacherNumber(memberId);
 
         return searchMemberOutputData;
     }
@@ -272,7 +272,8 @@ public class SearchMemberOutputData implements Serializable {
         searchMemberOutputData.setPopulationCode("F");
 
         searchMemberOutputData.setTeacherCategory("");
-        searchMemberOutputData.setTeacherNumber(person.getUsername());
+        final String memberId = strategy.retrieveMemberID(person);
+        searchMemberOutputData.setTeacherNumber(memberId);
 
         return searchMemberOutputData;
     }
