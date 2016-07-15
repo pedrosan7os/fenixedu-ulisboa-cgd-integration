@@ -26,13 +26,10 @@
  */
 package com.qubit.solution.fenixedu.integration.cgd.webservices.messages;
 
-import java.util.Collections;
-import java.util.List;
-
 import org.apache.commons.lang.StringUtils;
 import org.fenixedu.academic.domain.Person;
-import org.fenixedu.academic.domain.Teacher;
 import org.fenixedu.academic.domain.student.Student;
+import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.groups.DynamicGroup;
 
 import com.qubit.solution.fenixedu.integration.cgd.domain.configuration.CgdIntegrationConfiguration;
@@ -47,23 +44,18 @@ public class CgdMessageUtils {
     public static Person readPersonByMemberCode(String populationCode, String memberCode) {
         Person requestedPerson = null;
         if (!StringUtils.isEmpty(memberCode) && !StringUtils.isEmpty(populationCode)) {
-            switch (populationCode.charAt(0)) {
-            case 'A':
-                Student student = null;
+            if (populationCode.charAt(0) == 'A') {
                 if (StringUtils.isNumeric(memberCode)) {
-                    student = Student.readStudentByNumber(Integer.valueOf(memberCode));
+                    Student student = Student.readStudentByNumber(Integer.valueOf(memberCode));
+                    if (student != null) {
+                        requestedPerson = student.getPerson();
+                    }
                 }
-                if (student != null) {
-                    requestedPerson = student.getPerson();
-                }
-            case 'E':
-                // NOT YET IMPLEMENTED
-                break;
-            case 'D':
-                List<Teacher> readByNumbers = Teacher.readByNumbers(Collections.singleton(memberCode));
-                Teacher teacher = readByNumbers.isEmpty() ? null : readByNumbers.iterator().next();
-                if (teacher != null) {
-                    requestedPerson = teacher.getPerson();
+            }
+            if (requestedPerson == null) {
+                final User user = User.findByUsername(memberCode);
+                if (user != null) {
+                    requestedPerson = user.getPerson();
                 }
             }
         }
