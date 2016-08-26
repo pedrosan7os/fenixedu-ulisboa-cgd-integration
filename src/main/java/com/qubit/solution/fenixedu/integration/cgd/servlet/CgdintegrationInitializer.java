@@ -52,6 +52,7 @@ public class CgdintegrationInitializer implements ServletContextListener {
             }
         });
 
+
 //        StudentAccessServices.subscribeSyncRegistration(new SyncRegistrationWithCgd());
 
     }

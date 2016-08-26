@@ -26,8 +26,10 @@
  */
 package com.qubit.solution.fenixedu.integration.cgd.services.form43;
 
+import java.util.Base64;
 import java.util.List;
 
+import javax.xml.bind.JAXBElement;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.ws.BindingProvider;
@@ -53,6 +55,7 @@ import com.qubit.solution.fenixedu.bennu.webservices.services.client.BennuWebSer
 import com.qubit.solution.fenixedu.integration.cgd.domain.configuration.CgdIntegrationConfiguration;
 
 import services.caixaiu.cgd.wingman.iesservice.Client;
+import services.caixaiu.cgd.wingman.iesservice.FindFormRequest;
 import services.caixaiu.cgd.wingman.iesservice.Form43Digital;
 import services.caixaiu.cgd.wingman.iesservice.IESService;
 import services.caixaiu.cgd.wingman.iesservice.IIESService;
@@ -60,6 +63,7 @@ import services.caixaiu.cgd.wingman.iesservice.IdentificationCard;
 import services.caixaiu.cgd.wingman.iesservice.ObjectFactory;
 import services.caixaiu.cgd.wingman.iesservice.OperationResult;
 import services.caixaiu.cgd.wingman.iesservice.Person;
+import services.caixaiu.cgd.wingman.iesservice.PostedFile;
 import services.caixaiu.cgd.wingman.iesservice.Student;
 import services.caixaiu.cgd.wingman.iesservice.ValidationResult;
 import services.caixaiu.cgd.wingman.iesservice.Worker;
@@ -82,6 +86,7 @@ public class CgdForm43Sender extends BennuWebServiceClient<IIESService> {
         return sendForm43For(registration, true);
     }
 
+
     public boolean sendForm43For(Registration registration, boolean requestCard) {
         IIESService service = (IIESService) getClient();
         boolean success = false;
@@ -103,7 +108,7 @@ public class CgdForm43Sender extends BennuWebServiceClient<IIESService> {
             success = !setForm43DigitalData.isError();
             if (!success) {
                 logger.info("Problems while trying to send form 43 to student with number: "
-                        + registration.getStudent().getNumber() + "with message: "
+                        + registration.getStudent().getNumber() + " with message: "
                         + setForm43DigitalData.getFriendlyMessage().getValue() + "\nCode id: " + setForm43DigitalData.getCodeId()
                         + "\n Unique Error ID: " + setForm43DigitalData.getUEC()
                         + "\n In case there are violations they'll be present bellow ");
@@ -117,6 +122,52 @@ public class CgdForm43Sender extends BennuWebServiceClient<IIESService> {
         } catch (Throwable t) {
             logger.warn("Problems while trying to send form43 for student with number: " + registration.getStudent().getNumber(),
                     t);
+        }
+
+        return success;
+    }
+
+
+    public boolean uploadFormAttachment(Registration registration) {
+        IIESService service = (IIESService) getClient();
+        boolean success = false;
+        try {
+            org.fenixedu.academic.domain.Person person = registration.getStudent().getPerson();
+
+            ObjectFactory factory = new ObjectFactory();
+            FindFormRequest findFormRequest = factory.createFindFormRequest();
+            findFormRequest.setIES(findIES(getInstitutionCode(registration), service));
+            String retrieveMemberID = CgdIntegrationConfiguration.getInstance().getMemberIDStrategy().retrieveMemberID(registration.getPerson());
+            findFormRequest.setMemberNumber(factory.createFindFormRequestMemberNumber(retrieveMemberID));
+
+
+            PostedFile postedFile = new PostedFile();
+            System.out.println("File size " + registration.getRegistrationDeclarationFile().getContent().length + " name: " +
+                registration.getRegistrationDeclarationFile().getFilename());
+            postedFile.setFileContent(Base64.getEncoder().encode(registration.getRegistrationDeclarationFile().getContent()));
+            // David
+            postedFile.setFileName("registration_document.pdf"); // David
+
+            OperationResult formAttachmentData = service.uploadFormAttachment(findFormRequest, postedFile);
+            success = !formAttachmentData.isError();
+            if (!success) {
+                logger.info("Problems while trying to upload registration document of student with number: "
+                    + registration.getStudent().getNumber() + " with message: " +formAttachmentData
+                    .getMessage().getValue() + " - "
+                    + formAttachmentData.getFriendlyMessage().getValue() + "\nCode id: " + formAttachmentData.getCodeId()
+                    + "\n Unique Error ID: " + formAttachmentData.getUEC()
+                    + "\n In case there are violations they'll be present bellow ");
+                for (ValidationResult validation : formAttachmentData.getViolations().getValue().getValidationResult()) {
+                    logger.error("Validation error : " + validation.getErrorMessage().getValue() + " [member: "
+                        + validation.getMemberNames().getValue().getString().toString() + "]");
+                }
+            } else {
+                logger.info("Sent successfully attachment file for student with number:" + registration.getStudent().getNumber
+                    ());
+            }
+        } catch (Throwable t) {
+            logger.warn("Problems while trying to send attachment file for student with number: " + registration.getStudent().getNumber(),
+                t);
         }
 
         return success;
@@ -390,12 +441,6 @@ public class CgdForm43Sender extends BennuWebServiceClient<IIESService> {
         }
         throw new Error("Unknown degree type: " + degreeType);
         //return DEGREE;
-    }
-
-    public String getSchooldIESCode() {
-        String institutionCode = getInstitutionCode();
-        IIESService client = getClient();
-        return findIES(institutionCode, client);
     }
 
     private static String findIES(String ministryCode, IIESService service) {
