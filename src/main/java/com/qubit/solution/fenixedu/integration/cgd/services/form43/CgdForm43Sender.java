@@ -26,6 +26,8 @@
  */
 package com.qubit.solution.fenixedu.integration.cgd.services.form43;
 
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.util.Base64;
 import java.util.List;
 
@@ -34,6 +36,8 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.ws.BindingProvider;
 
+import org.apache.commons.codec.binary.Base64InputStream;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.datacontract.schemas._2004._07.wingman_cgd_caixaiu_datacontract.School;
 import org.fenixedu.academic.domain.Country;
@@ -128,7 +132,7 @@ public class CgdForm43Sender extends BennuWebServiceClient<IIESService> {
     }
 
 
-    public boolean uploadFormAttachment(Registration registration) {
+    public boolean uploadFormAttachment(Registration registration, InputStream fileInputStream) {
         IIESService service = (IIESService) getClient();
         boolean success = false;
         try {
@@ -142,11 +146,10 @@ public class CgdForm43Sender extends BennuWebServiceClient<IIESService> {
 
 
             PostedFile postedFile = new PostedFile();
-            System.out.println("File size " + registration.getRegistrationDeclarationFile().getContent().length + " name: " +
-                registration.getRegistrationDeclarationFile().getFilename());
-            postedFile.setFileContent(Base64.getEncoder().encode(registration.getRegistrationDeclarationFile().getContent()));
-            // David
-            postedFile.setFileName("registration_document.pdf"); // David
+
+            postedFile.setFileContent(IOUtils.toByteArray(new Base64InputStream(fileInputStream,true)));
+
+            postedFile.setFileName("registration_document.pdf");
 
             OperationResult formAttachmentData = service.uploadFormAttachment(findFormRequest, postedFile);
             success = !formAttachmentData.isError();
