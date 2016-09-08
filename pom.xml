@@ -11,7 +11,7 @@
 
 	<groupId>pt.ist</groupId>
 	<artifactId>fenixedu-ulisboa-cgdIntegration</artifactId>
-	<version>1.2.0-SNAPSHOT</version>
+	<version>2.0.0.IST</version>
 	<packaging>jar</packaging>
 
 	<name>CGD Integration</name>
@@ -20,7 +20,6 @@
 		<version.org.fenixedu.bennu>3.4.1</version.org.fenixedu.bennu>
 		<version.org.fenixedu.academic>5.3.0</version.org.fenixedu.academic>
 		<version.org.fenixedu.bennu.spring>1.2.0</version.org.fenixedu.bennu.spring>
-		<version.pt.ist.fenixedu-ist>8.1.0</version.pt.ist.fenixedu-ist>
 		<version.com.qubit.solution.fenixedu.bennu-webservices-core>1.0.0.CONTRIB</version.com.qubit.solution.fenixedu.bennu-webservices-core>
 	</properties>
 	<dependencies>
@@ -43,11 +42,6 @@
 			<groupId>org.fenixedu</groupId>
 			<artifactId>bennu-spring</artifactId>
 			<version>${version.org.fenixedu.bennu.spring}</version>
-		</dependency>
-		<dependency>
-			<groupId>pt.ist</groupId>
-			<artifactId>fenixedu-ist-registration-process</artifactId>
-			<version>${version.pt.ist.fenixedu-ist}</version>
 		</dependency>
  	</dependencies>
 
