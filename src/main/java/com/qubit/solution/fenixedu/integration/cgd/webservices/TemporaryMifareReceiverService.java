@@ -30,13 +30,13 @@ import javax.jws.WebMethod;
 import javax.jws.WebService;
 
 import org.fenixedu.academic.domain.Person;
-import org.fenixedu.ulisboa.specifications.domain.idcards.CgdCard;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import pt.ist.fenixframework.Atomic;
 
 import com.qubit.solution.fenixedu.bennu.webservices.services.server.BennuWebService;
+import com.qubit.solution.fenixedu.integration.cgd.domain.idcards.CgdCard;
 import com.qubit.solution.fenixedu.integration.cgd.services.form43.CgdForm43Sender;
 import com.qubit.solution.fenixedu.integration.cgd.webservices.messages.CgdMessageUtils;
 import com.qubit.solution.fenixedu.integration.cgd.webservices.messages.mifareReceiver.Response;
@@ -50,22 +50,10 @@ public class TemporaryMifareReceiverService extends BennuWebService {
 
     private static String IES_CODE = null;
 
-    private String getIESCode() {
-        if (IES_CODE == null) {
-            IES_CODE = new CgdForm43Sender().getSchooldIESCode();
-        }
-        return IES_CODE;
-    }
-
     @WebMethod
     public Response receiveMifare(String mifare, String memberNumber, String memberCategoryCode, String iesCode) {
 
         Response response = new Response();
-        if (getIESCode() != null && !getIESCode().equals(iesCode)) {
-            response.setStatus(Status.NOK);
-            response.setErrorCode(ErrorCode.INVALID_DATA);
-            response.setErrorDescription("Wrong iesCode, expected: " + getIESCode() + " received " + iesCode);
-        } else {
             try {
                 Person readPerson = CgdMessageUtils.getMemberIDStrategy().readPerson(memberNumber);
                 if (readPerson == null) {
@@ -87,7 +75,7 @@ public class TemporaryMifareReceiverService extends BennuWebService {
                 response.setErrorCode(ErrorCode.INTERNAL_ERROR);
                 response.setErrorDescription(t.getMessage());
             }
-        }
+
         return response;
     }
 
