@@ -30,10 +30,10 @@ import org.apache.commons.lang.StringUtils;
 import org.fenixedu.academic.domain.Person;
 import org.fenixedu.academic.domain.student.Student;
 import org.fenixedu.bennu.core.domain.User;
-import org.fenixedu.bennu.core.groups.DynamicGroup;
 
 import com.qubit.solution.fenixedu.integration.cgd.domain.configuration.CgdIntegrationConfiguration;
 import com.qubit.solution.fenixedu.integration.cgd.webservices.resolver.memberid.IMemberIDAdapter;
+import org.fenixedu.bennu.core.groups.Group;
 
 public class CgdMessageUtils {
 
@@ -69,7 +69,7 @@ public class CgdMessageUtils {
             if (pc == 'A' && person.getStudent() == null) {
                 return false;
             }
-            if (pc == 'F' && !DynamicGroup.get("employees").isMember(person.getUser())) {
+            if (pc == 'F' && !Group.dynamic("employees").isMember(person.getUser())) {
                 return false;
             }
             if (pc == 'D' && person.getTeacher() == null) {

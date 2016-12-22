@@ -12,10 +12,10 @@ import org.fenixedu.academic.domain.Person;
 import org.fenixedu.academic.domain.Teacher;
 import org.fenixedu.academic.domain.student.Registration;
 import org.fenixedu.academic.domain.student.Student;
-import org.fenixedu.bennu.core.groups.DynamicGroup;
 
 import com.qubit.solution.fenixedu.integration.cgd.webservices.messages.CgdMessageUtils;
 import com.qubit.solution.fenixedu.integration.cgd.webservices.resolver.memberid.IMemberIDAdapter;
+import org.fenixedu.bennu.core.groups.Group;
 
 public class SearchMemberOutput implements Serializable {
 
@@ -76,7 +76,7 @@ public class SearchMemberOutput implements Serializable {
                 list.add(SearchMemberOutputData.createTeacherBased(memberIDStrategy, person.getTeacher()));
             }
 
-            if (DynamicGroup.get("employees").isMember(person.getUser())) {
+            if (Group.dynamic("employees").isMember(person.getUser())) {
                 list.add(SearchMemberOutputData.createEmployeeBased(memberIDStrategy, person));
             }
 
@@ -112,7 +112,7 @@ public class SearchMemberOutput implements Serializable {
                         }
                         break;
                     case 'F':
-                        boolean member = DynamicGroup.get("employees").isMember(person.getUser());
+                        boolean member = Group.dynamic("employees").isMember(person.getUser());
                         if (member) {
                             createDefault.setPopulationCode("F");
                             createDefault.setTeacherNumber(memberId);
